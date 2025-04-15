@@ -10,6 +10,7 @@
 # Build results
 [Bb]in/
 [Oo]bj/
+x64/
 *.exe
 *.dll
 *.lib
