@@ -2,17 +2,17 @@
 
 int main(int argc, char* argv[])
 {
-	int choice = 0;
+	int *choice = new int();
 	CheckingTheCommandSpelling(argc, argv);
 
 	std::fstream fileStream(argv[1], std::ios::in | std::ios::out);
 	if (!fileStream.is_open())
 	{
 		std::cerr << "This file does not exist. Do you want to create him? (1 - Yes, Another_key - No)\n";
-		std::cin >> choice;
+		std::cin >> *choice;
 		std::cin.clear();
 		std::cin.ignore(LLONG_MAX, '\n');
-		if (choice != 1)
+		if (*choice != 1)
 		{
 			fileStream.close();
 			return 0;
@@ -27,12 +27,12 @@ int main(int argc, char* argv[])
 		<< "2 - Start writing a text from the end;\n"
 		<< "3 - Start writing a text from specific point;\n"
 		<< "4 - Delete some character;\n"
-		<< "5 - Delete some word;\n";
-	std::cin >> choice;
+		<< "5 - Delete some word; (Does the same as option 4 for now)\n";
+	std::cin >> *choice;
 	std::cin.clear();
 	std::cin.ignore(LLONG_MAX, '\n');
 
-	switch (choice)
+	switch (*choice)
 	{
 	case 1:
 		fileStream.close();

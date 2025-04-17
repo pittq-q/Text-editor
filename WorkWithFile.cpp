@@ -46,74 +46,78 @@ void ReadingFile(std::fstream& fileStream)
 	fileStream.clear();
 }
 
-void StartWritingATextFromTheEnd(int choice, std::fstream& fileStream)
+void WritingIntoFile(int SIZE, std::fstream& fileStream)
 {
-	std::cout << "!Warning: You can writing 1 line only (In next update, i going to fix it)." << std::endl
-		<< "Choose a size of your text: ";
+	std::cout << "Now, you can write (Double \"enter\" for completion): \n";
+	char* text = new char[SIZE];
+	do
+	{
+		std::cin.getline(text, SIZE);
+		if (text[0] == '\0')
+		{
+			break;
+		}
+		fileStream << text << '\n';
+		memset(text, 0, SIZE);
+	} while (true);
 
-	std::cin >> choice;
+	std::cout << "Your file has been changed. I will close it.\n";
+
+	delete[] text;
+}
+
+void StartWritingATextFromTheEnd(int* choice, std::fstream& fileStream)
+{
+	std::cout << "Choose a size of your text: ";
+
+	std::cin >> *choice;
 	std::cin.clear();
 	std::cin.ignore(LLONG_MAX, '\n');
-
-	char* text = new char[choice];
-	std::cin.getline(text, choice);
 
 	fileStream.seekp(0, std::ios::end);
-	fileStream << text;
 
-	std::cout << "Your file has been changed. I will close it.\n";
-
-	delete[] text;
+	WritingIntoFile(*choice, fileStream);
 }
 
-void StartWritingATextFromSpecificPoint(int choice, std::fstream& fileStream)
+void StartWritingATextFromSpecificPoint(int* choice, std::fstream& fileStream)
 {
 	std::cout << "Enter the position you want to do from (start from 0): ";
-	std::cin >> choice;
+	std::cin >> *choice;
 	std::cin.clear();
 	std::cin.ignore(LLONG_MAX, '\n');
 
-	fileStream.seekp(choice, std::ios::beg);
+	fileStream.seekp(*choice, std::ios::beg);
 
-	std::cout << "!Warning: You can writing 1 line only (In next update, i will fix it)." << std::endl
-		<< "Choose a size of your text: ";
+	std::cout << "Choose a size of your text: ";
 
-	std::cin >> choice;
+	std::cin >> *choice;
 	std::cin.clear();
 	std::cin.ignore(LLONG_MAX, '\n');
 
-	char* text = new char[choice];
-	std::cin.getline(text, choice);
-
-	fileStream << text << '\n';
-
-	std::cout << "Your file has been changed. I will close it.\n";
-
-	delete[] text;
+	WritingIntoFile(*choice, fileStream);
 }
 
-void DeleteSomeCharacterFromFile(int choice, const char* argv, std::fstream& fileStream)
+void DeleteSomeCharacterFromFile(int* choice, const char* argv, std::fstream& fileStream)
 {
 	std::cout << "Enter the position of the character you want to delete (start from 0): ";
-	std::cin >> choice;
+	std::cin >> *choice;
 	std::cin.clear();
 	std::cin.ignore(LLONG_MAX, '\n');
 
-	fileStream.seekg(std::ios::beg, choice);
-	int firstPos = fileStream.peek();
-	fileStream.seekg(std::ios::end);
-	int lastPos = fileStream.peek();
+	fileStream.seekg(-1, std::ios::end);
+	std::streampos lastPos = fileStream.tellg();
+	fileStream.seekg(*choice + 1);
+	std::streamsize currentFileSize = lastPos - fileStream.tellg();
+	char* text = new char[currentFileSize + 1];
 
-	char* text = new char[lastPos - firstPos];
-
-	for (size_t i = 0; i < lastPos - firstPos; i++)
+	for (size_t i = 0; i < currentFileSize + 1; i++)
 	{
 		text[i] = fileStream.get();
 	}
 
-	fileStream.seekp(std::ios::beg, choice);
-
-	for (size_t i = 1; i < lastPos - firstPos; i++)
+	fileStream.clear();
+	fileStream.seekp(*choice);
+	for (size_t i = 0; i < currentFileSize + 1; i++)
 	{
 		fileStream.put(text[i]);
 	}
@@ -122,33 +126,27 @@ void DeleteSomeCharacterFromFile(int choice, const char* argv, std::fstream& fil
 	delete[] text;
 }
 
-void DeleteSomeWordFromFile(int choice, const char* argv, std::fstream& fileStream)
+void DeleteSomeWordFromFile(int* choice, const char* argv, std::fstream& fileStream)
 {
 	std::cout << "Enter the position of the character you want to delete (start from 0): ";
-	std::cin >> choice;
+	std::cin >> *choice;
 	std::cin.clear();
 	std::cin.ignore(LLONG_MAX, '\n');
 
-	fileStream.seekg(std::ios::beg, choice);
-	int firstPos = fileStream.peek();
-	fileStream.seekg(std::ios::end);
-	int lastPos = fileStream.peek();
+	fileStream.seekg(-1, std::ios::end);
+	std::streampos lastPos = fileStream.tellg();
+	fileStream.seekg(*choice + 1);
+	std::streamsize currentFileSize = lastPos - fileStream.tellg();
+	char* text = new char[currentFileSize + 1];
 
-	char* text = new char[lastPos - firstPos];
-	int posOfTheSelectedWord = 0;
-
-	for (size_t i = 0; i < lastPos - firstPos; i++)
+	for (size_t i = 0; i < currentFileSize + 1; i++)
 	{
 		text[i] = fileStream.get();
-		if (text[i] == ' ' || text[i] == '\n')
-		{
-			posOfTheSelectedWord = i;
-		}
 	}
 
-	fileStream.seekp(std::ios::beg, choice);
-
-	for (size_t i = posOfTheSelectedWord; i < lastPos - firstPos; i++)
+	fileStream.clear();
+	fileStream.seekp(*choice);
+	for (size_t i = 0; i < currentFileSize + 1; i++)
 	{
 		fileStream.put(text[i]);
 	}
