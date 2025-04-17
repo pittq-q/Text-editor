@@ -1,32 +1,16 @@
 #include <iostream>
 #include <fstream>
 
+void CheckingTheCommandSpelling(const int argc, const char* argv[]);
+
+template<typename StreamType>
+void CheckingForFileOpening(StreamType& fileStream);
+
+
 int main(int argc, char* argv[])
 {
 	int choice = 0;
-
-	if (argc < 2)
-	{
-		std::cerr << "You didn't entered file for editing!";
-		return 1;
-	}
-
-	if (argc > 2)
-	{
-		std::cerr << "You entered too many arguments!";
-		return 1;
-	}
-	
-	int count = 0;
-	while (argv[1][count] != '.')
-	{
-		if (argv[1][count] == '\0')
-		{
-			std::cerr << "Your file doesn't have extension!";
-			return 1;
-		}
-		count++;
-	}
+	CheckingTheCommandSpelling(argc, argv);
 
 	std::ifstream fileStreamin(argv[1]);
 	if (!fileStreamin.is_open())
@@ -51,11 +35,7 @@ int main(int argc, char* argv[])
 	fileStreamin.close();
 
 	std::ofstream fileStreamout(argv[1], std::ios::app);
-	if (!fileStreamout.is_open())
-	{
-		std::cerr << "Couldn't open the file for writing.\n";
-		return 1;
-	}
+	CheckingForFileOpening(fileStreamout);
 
 	std::cout << "\n\nWhat do you want to do?\n"
 		<< "1 - Close file;\n"
@@ -129,11 +109,7 @@ int main(int argc, char* argv[])
 
 		fileStreamout.close();
 		fileStreamin.open(argv[1]);
-		if (!fileStreamin.is_open())
-		{
-			std::cerr << "Couldn't open the file for reading.\n";
-			return 1;
-		}
+		CheckingForFileOpening(fileStreamin);
 
 		fileStreamin.seekg(std::ios::beg, choice);
 		int firstPos = fileStreamin.peek();
@@ -149,11 +125,7 @@ int main(int argc, char* argv[])
 		fileStreamin.close();
 
 		fileStreamout.open(argv[1]);
-		if (!fileStreamout.is_open())
-		{
-			std::cerr << "Couldn't open the file for writing.\n";
-			return 1;
-		}
+		CheckingForFileOpening(fileStreamout);
 		fileStreamout.seekp(std::ios::beg, choice);
 
 		for (size_t i = 1; i < lastPos - firstPos; i++)
@@ -175,11 +147,7 @@ int main(int argc, char* argv[])
 
 		fileStreamout.close();
 		fileStreamin.open(argv[1]);
-		if (!fileStreamin.is_open())
-		{
-			std::cerr << "Couldn't open the file for reading.\n";
-			return 1;
-		}
+		CheckingForFileOpening(fileStreamin);
 
 		fileStreamin.seekg(std::ios::beg, choice);
 		int firstPos = fileStreamin.peek();
@@ -200,11 +168,7 @@ int main(int argc, char* argv[])
 		fileStreamin.close();
 
 		fileStreamout.open(argv[1]);
-		if (!fileStreamout.is_open())
-		{
-			std::cerr << "Couldn't open the file for writing.\n";
-			return 1;
-		}
+		CheckingForFileOpening(fileStreamout);
 		fileStreamout.seekp(std::ios::beg, choice);
 
 		for (size_t i = posOfTheSelectedWord; i < lastPos - firstPos; i++)
@@ -224,4 +188,40 @@ int main(int argc, char* argv[])
 	}
 
 	return 0;
+}
+
+void CheckingTheCommandSpelling(const int argc, const char* argv[])
+{
+	if (argc < 2)
+	{
+		std::cerr << "You didn't entered file for editing!";
+		exit(1);
+	}
+
+	if (argc > 2)
+	{
+		std::cerr << "You entered too many arguments!";
+		exit(1);
+	}
+
+	int count = 0;
+	while (argv[1][count] != '.')
+	{
+		if (argv[1][count] == '\0')
+		{
+			std::cerr << "Your file doesn't have extension!";
+			exit(1);
+		}
+		count++;
+	}
+}
+
+template<typename StreamType>
+void CheckingForFileOpening(StreamType& fileStream)
+{
+	if (!fileStream.is_open())
+	{
+		std::cerr << "Couldn't open the file. I will stop program.\n";
+		exit(1);
+	}
 }
