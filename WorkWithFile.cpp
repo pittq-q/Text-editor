@@ -104,23 +104,22 @@ void DeleteSomeCharacterFromFile(int* choice, const char* argv, std::fstream& fi
 	std::cin.clear();
 	std::cin.ignore(LLONG_MAX, '\n');
 
-	fileStream.seekg(-1, std::ios::end);
-	std::streampos lastPos = fileStream.tellg();
-	fileStream.seekg(*choice + 1);
-	std::streamsize currentFileSize = lastPos - fileStream.tellg();
-	char* text = new char[currentFileSize + 1];
+	fileStream.seekg(0, std::ios::end);
+	std::streamsize fileSize = fileStream.tellg();
 
-	for (size_t i = 0; i < currentFileSize + 1; i++)
-	{
-		text[i] = fileStream.get();
-	}
+	char* text = new char[fileSize];
 
+	fileStream.close();
+	fileStream.open(argv, std::ios::in | std::ios::binary);
+	fileStream.read(text, fileSize);
 	fileStream.clear();
-	fileStream.seekp(*choice);
-	for (size_t i = 0; i < currentFileSize + 1; i++)
-	{
-		fileStream.put(text[i]);
-	}
+	fileStream.close();
+
+	fileStream.open(argv, std::ios::out | std::ios::binary);
+	CheckingForFileOpening(fileStream);
+
+	fileStream.write(text, *choice);
+	fileStream.write(text + *choice + 1, fileSize - *choice - 1);
 
 	std::cout << "Your file has been changed. I will close it.\n";
 	delete[] text;
@@ -128,28 +127,36 @@ void DeleteSomeCharacterFromFile(int* choice, const char* argv, std::fstream& fi
 
 void DeleteSomeWordFromFile(int* choice, const char* argv, std::fstream& fileStream)
 {
-	std::cout << "Enter the position of the character you want to delete (start from 0): ";
+	std::cout << "Enter the position of the word you want to delete (start from 0): ";
 	std::cin >> *choice;
 	std::cin.clear();
 	std::cin.ignore(LLONG_MAX, '\n');
 
-	fileStream.seekg(-1, std::ios::end);
-	std::streampos lastPos = fileStream.tellg();
-	fileStream.seekg(*choice + 1);
-	std::streamsize currentFileSize = lastPos - fileStream.tellg();
-	char* text = new char[currentFileSize + 1];
+	fileStream.seekg(0, std::ios::end);
+	std::streamsize fileSize = fileStream.tellg();
 
-	for (size_t i = 0; i < currentFileSize + 1; i++)
-	{
-		text[i] = fileStream.get();
-	}
+	char* text = new char[fileSize];
 
+	fileStream.close();
+	fileStream.open(argv, std::ios::in | std::ios::binary);
+	fileStream.read(text, fileSize);
 	fileStream.clear();
-	fileStream.seekp(*choice);
-	for (size_t i = 0; i < currentFileSize + 1; i++)
+	fileStream.close();
+
+	fileStream.open(argv, std::ios::out | std::ios::binary);
+	CheckingForFileOpening(fileStream);
+
+	fileStream.write(text, *choice);
+
+	do
 	{
-		fileStream.put(text[i]);
-	}
+		(*choice)++;
+		if (text[*choice] == ' ' || text[*choice] == '\n')
+		{
+			fileStream.write(text + *choice, fileSize - *choice);
+			break;
+		}
+	} while (text[*choice] != '\0');
 
 	std::cout << "Your file has been changed. I will close it.\n";
 	delete[] text;
