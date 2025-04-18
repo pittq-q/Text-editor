@@ -135,18 +135,41 @@ void DeleteSomeWordFromFile(int* choice, const char* argv, std::fstream& fileStr
 	fileStream.seekg(0, std::ios::end);
 	std::streamsize fileSize = fileStream.tellg();
 
-	char* text = new char[fileSize];
+	if (*choice >= fileSize) {
+		std::cerr << "Error: Choice is out of file bounds.\n";
+		return;
+	}
+
+	char* text = new char[fileSize + 1]();
 
 	fileStream.close();
+
 	fileStream.open(argv, std::ios::in | std::ios::binary);
+	CheckingForFileOpening(fileStream);
+
 	fileStream.read(text, fileSize);
 	fileStream.clear();
+	text[fileSize] = '\0';
 	fileStream.close();
 
 	fileStream.open(argv, std::ios::out | std::ios::binary);
 	CheckingForFileOpening(fileStream);
 
-	fileStream.write(text, *choice);
+	int count = 0;
+	for (size_t i = 0; i < *choice; i++)
+	{
+		if (text[i] == '\n')
+		{
+			count += 2;
+		}
+	}
+	*choice += count;
+
+	if (text[*choice] == '\n')
+	{
+		(*choice)++;
+	}
+	fileStream.write(text, *choice - 1);  // "-1" to delete from the marked symbol
 
 	do
 	{
