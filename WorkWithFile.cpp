@@ -35,66 +35,90 @@ void CheckingForFileOpening(std::fstream& fileStream)
 	}
 }
 
-void ReadingFile(std::fstream& fileStream)
+void ReadingFile(char* argv, std::fstream& fileStream)
 {
+	if (fileStream.is_open())
+	{
+		fileStream.close();
+	}
+	fileStream.open(argv, std::ios::in);
 	char character;
+	std::cout << "\nHere is the new file content:\n"
+		<< "\n--------------------------\n";
 	while (fileStream.get(character))
 	{
 		std::cout << character;
 	}
-
+	std::cout << "\n--------------------------\n";
 	fileStream.clear();
 }
 
-void WritingIntoFile(int SIZE, std::fstream& fileStream)
+char* WritingYourText(int choice, std::fstream& fileStream)
 {
-	std::cout << "Now, you can write (Double \"enter\" for completion): \n";
-	char* text = new char[SIZE];
+	std::cout << "Choose a size of your text: ";
+
+	std::cin >> choice;
+	std::cin.clear();
+	std::cin.ignore(LLONG_MAX, '\n');
+
+	std::cout << "Now, you can write (Double \"enter\" for completion (max - 5): \n";
+	char* line = new char[choice]();
+	char* fullNewText = new char[choice * 5]();
 	do
 	{
-		std::cin.getline(text, SIZE);
-		if (text[0] == '\0')
+		std::cin.getline(line, choice);
+		if (line[0] == '\0')
 		{
 			break;
 		}
-		fileStream << text << '\n';
-		memset(text, 0, SIZE);
+		strcat_s(fullNewText, choice * 5, line);
+		strcat_s(fullNewText, choice * 5, "\n");
+		memset(line, 0, choice);
 	} while (true);
 
-	std::cout << "Your file has been changed. I will close it.\n";
+	std::cout << "Your file has been changed.\n";
 
-	delete[] text;
+	return fullNewText;
+	delete[] fullNewText;
+	delete[] line;
 }
 
 void StartWritingATextFromTheEnd(int* choice, std::fstream& fileStream)
 {
-	std::cout << "Choose a size of your text: ";
-
-	std::cin >> *choice;
-	std::cin.clear();
-	std::cin.ignore(LLONG_MAX, '\n');
-
 	fileStream.seekp(0, std::ios::end);
-
-	WritingIntoFile(*choice, fileStream);
+	fileStream << WritingYourText(*choice, fileStream);
 }
 
-void StartWritingATextFromSpecificPoint(int* choice, std::fstream& fileStream)
+void StartWritingATextFromSpecificPoint(int* choice, char* argv, std::fstream& fileStream)
 {
 	std::cout << "Enter the position you want to do from (start from 0): ";
 	std::cin >> *choice;
 	std::cin.clear();
 	std::cin.ignore(LLONG_MAX, '\n');
 
-	fileStream.seekp(*choice, std::ios::beg);
+	fileStream.seekg(0, std::ios::end);
+	std::streamsize fileSize = fileStream.tellg();
 
-	std::cout << "Choose a size of your text: ";
+	if (*choice >= fileSize) {
+		std::cerr << "Error: Choice is out of file bounds.\n";
+		return;
+	}
 
-	std::cin >> *choice;
-	std::cin.clear();
-	std::cin.ignore(LLONG_MAX, '\n');
+	char* fileText = new char[fileSize + 1]();
 
-	WritingIntoFile(*choice, fileStream);
+	fileStream.close();
+	fileStream.open(argv, std::ios::in | std::ios::binary);
+	CheckingForFileOpening(fileStream);
+	fileStream.read(fileText, fileSize);
+	fileStream.clear();
+	fileText[fileSize] = '\0';
+	fileStream.close();
+
+	fileStream.open(argv, std::ios::out | std::ios::binary);
+	CheckingForFileOpening(fileStream);
+
+	fileStream.write(fileText, *choice);
+	//fileStream.write(WritingYourText(*choice, fileStream), );
 }
 
 void DeleteSomeCharacterFromFile(int* choice, const char* argv, std::fstream& fileStream)
@@ -107,19 +131,46 @@ void DeleteSomeCharacterFromFile(int* choice, const char* argv, std::fstream& fi
 	fileStream.seekg(0, std::ios::end);
 	std::streamsize fileSize = fileStream.tellg();
 
-	char* text = new char[fileSize];
+	if (*choice >= fileSize) {
+		std::cerr << "Error: Choice is out of file bounds.\n";
+		return;
+	}
+
+	char* text = new char[fileSize + 1]();
 
 	fileStream.close();
 	fileStream.open(argv, std::ios::in | std::ios::binary);
+	CheckingForFileOpening(fileStream);
 	fileStream.read(text, fileSize);
 	fileStream.clear();
+	text[fileSize] = '\0';
 	fileStream.close();
 
 	fileStream.open(argv, std::ios::out | std::ios::binary);
 	CheckingForFileOpening(fileStream);
 
-	fileStream.write(text, *choice);
-	fileStream.write(text + *choice + 1, fileSize - *choice - 1);
+	int count = 0;
+	for (size_t i = 0; i < *choice + 1; i++)
+	{
+		if (text[i] == '\n')
+		{
+			count += 2;
+		}
+	}
+	*choice += count;
+
+	if (text[*choice] == '\n')
+	{
+		*choice += 2;
+	}
+	else if (text[*choice] == '\r')
+	{
+		*choice += 3;
+	}
+
+	fileStream.write(text, *choice); // "-1" to delete from the marked symbol
+
+	fileStream.write(text + *choice + 1, fileSize - *choice -1);
 
 	std::cout << "Your file has been changed. I will close it.\n";
 	delete[] text;
@@ -168,6 +219,10 @@ void DeleteSomeWordFromFile(int* choice, const char* argv, std::fstream& fileStr
 	if (text[*choice] == '\n')
 	{
 		(*choice)++;
+	}
+	else if (text[*choice] == '\r')
+	{
+		*choice += 2;
 	}
 	fileStream.write(text, *choice - 1);  // "-1" to delete from the marked symbol
 

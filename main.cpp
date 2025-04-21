@@ -14,15 +14,24 @@ int main(int argc, char* argv[])
 		std::cin.ignore(LLONG_MAX, '\n');
 		if (*choice != 1)
 		{
+			std::remove(argv[1]);
 			fileStream.close();
 			return 0;
 		}
 	}
 
 	system("cls");
-	ReadingFile(fileStream);
+	char character;
+	std::cout << "Here is the file content:\n"
+		<< "\n--------------------------\n";
+	while (fileStream.get(character))
+	{
+		std::cout << character;
+	}
+	std::cout << "\n--------------------------\n";
+	fileStream.clear();
 
-	std::cout << "\n\nWhat do you want to do?\n"
+	std::cout << "\nWhat do you want to do?\n"
 		<< "1 - Close file;\n"
 		<< "2 - Start writing a text from the end;\n"
 		<< "3 - Start writing a text from specific point;\n"
@@ -35,30 +44,39 @@ int main(int argc, char* argv[])
 	switch (*choice)
 	{
 	case 1:
+		std::cout << "\n\nClosing...\n";
 		fileStream.close();
 		break;
 
 	case 2: 
 	{
 		StartWritingATextFromTheEnd(choice, fileStream);
+		ReadingFile(argv[1], fileStream);
+		std::cout << "\n\nClosing...\n";
 		fileStream.close();
 		break;
 	}
 	case 3:
 	{
-		StartWritingATextFromSpecificPoint(choice, fileStream);
+		StartWritingATextFromSpecificPoint(choice, argv[1], fileStream);
+		ReadingFile(argv[1], fileStream);
+		std::cout << "\n\nClosing...\n";
 		fileStream.close();
 		break;
 	}
 	case 4:
 	{
 		DeleteSomeCharacterFromFile(choice, argv[1], fileStream);
+		ReadingFile(argv[1], fileStream);
+		std::cout << "\n\nClosing...\n";
 		fileStream.close();
 		break;
 	}
 	case 5:
 	{
 		DeleteSomeWordFromFile(choice, argv[1], fileStream);
+		ReadingFile(argv[1], fileStream);
+		std::cout << "\n\nClosing...\n";
 		fileStream.close();
 		break;
 	}
