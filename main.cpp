@@ -81,10 +81,11 @@ int main(int argc, char* argv[])
 		break;
 	}
 	default:
-		std::cout << "You entered uncorrect choice. I will close your file :)\n";
+		std::cout << "You entered incorrect choice. I will close your file :)\n";
 		fileStream.close();
 		break;
 	}
 
+	delete choice;
 	return 0;
 }

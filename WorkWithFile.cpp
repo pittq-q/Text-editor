@@ -4,7 +4,7 @@ void CheckingTheCommandSpelling(const int argc, char* argv[])
 {
 	if (argc < 2)
 	{
-		std::cerr << "You didn't entered file for editing!";
+		std::cerr << "You didn't enter file for editing!";
 		exit(1);
 	}
 
@@ -78,9 +78,9 @@ char* WritingYourText(int choice, std::fstream& fileStream)
 
 	std::cout << "Your file has been changed.\n";
 
+	delete[] line;
 	return fullNewText;
 	delete[] fullNewText;
-	delete[] line;
 }
 
 void StartWritingATextFromTheEnd(int* choice, std::fstream& fileStream)
