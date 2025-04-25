@@ -117,8 +117,37 @@ void StartWritingATextFromSpecificPoint(int* choice, char* argv, std::fstream& f
 	fileStream.open(argv, std::ios::out | std::ios::binary);
 	CheckingForFileOpening(fileStream);
 
+	int count = 0;
+	for (size_t i = 0; i < *choice + 1; i++)
+	{
+		if (fileText[i] == '\r')
+		{
+			count += 2;
+		}
+	}
+
+	for (size_t i = *choice + 1; i < *choice + count; i++)
+	{
+		if (fileText[i] == '\r')
+		{
+			count += 2;
+		}
+	}
+	*choice += count;
+
+	if (fileText[*choice] == '\n')
+	{
+		*choice += 1;
+	}
+	else if (fileText[*choice] == '\r')
+	{
+		*choice += 2;
+	}
+
 	fileStream.write(fileText, *choice);
-	//fileStream.write(WritingYourText(*choice, fileStream), );
+	char* userText = WritingYourText(*choice, fileStream);
+	fileStream.write(userText, strlen(userText));
+	fileStream.write(fileText + *choice, fileSize - *choice);
 }
 
 void DeleteSomeCharacterFromFile(int* choice, const char* argv, std::fstream& fileStream)
@@ -136,44 +165,52 @@ void DeleteSomeCharacterFromFile(int* choice, const char* argv, std::fstream& fi
 		return;
 	}
 
-	char* text = new char[fileSize + 1]();
+	char* fileText = new char[fileSize + 1]();
 
 	fileStream.close();
 	fileStream.open(argv, std::ios::in | std::ios::binary);
 	CheckingForFileOpening(fileStream);
-	fileStream.read(text, fileSize);
+	fileStream.read(fileText, fileSize);
 	fileStream.clear();
-	text[fileSize] = '\0';
+	fileText[fileSize] = '\0';
 	fileStream.close();
 
 	fileStream.open(argv, std::ios::out | std::ios::binary);
 	CheckingForFileOpening(fileStream);
 
 	int count = 0;
-	for (size_t i = 0; i < *choice + 1; i++)
+	for (size_t i = 0; i < *choice; i++)
 	{
-		if (text[i] == '\n')
+		if (fileText[i] == '\r')
+		{
+			count += 2;
+		}
+	}
+
+	for (size_t i = *choice; i < *choice + count; i++)
+	{
+		if (fileText[i] == '\r')
 		{
 			count += 2;
 		}
 	}
 	*choice += count;
 
-	if (text[*choice] == '\n')
+	if (fileText[*choice] == '\n')
+	{
+		*choice += 1;
+	}
+	else if (fileText[*choice] == '\r')
 	{
 		*choice += 2;
 	}
-	else if (text[*choice] == '\r')
-	{
-		*choice += 3;
-	}
 
-	fileStream.write(text, *choice); // "-1" to delete from the marked symbol
+	fileStream.write(fileText, *choice);
 
-	fileStream.write(text + *choice + 1, fileSize - *choice -1);
+	fileStream.write(fileText + *choice + 1, fileSize - *choice - 1);
 
-	std::cout << "Your file has been changed. I will close it.\n";
-	delete[] text;
+	std::cout << "Your file has been changed.\n";
+	delete[] fileText;
 }
 
 void DeleteSomeWordFromFile(int* choice, const char* argv, std::fstream& fileStream)
@@ -191,16 +228,16 @@ void DeleteSomeWordFromFile(int* choice, const char* argv, std::fstream& fileStr
 		return;
 	}
 
-	char* text = new char[fileSize + 1]();
+	char* fileText = new char[fileSize + 1]();
 
 	fileStream.close();
 
 	fileStream.open(argv, std::ios::in | std::ios::binary);
 	CheckingForFileOpening(fileStream);
 
-	fileStream.read(text, fileSize);
+	fileStream.read(fileText, fileSize);
 	fileStream.clear();
-	text[fileSize] = '\0';
+	fileText[fileSize] = '\0';
 	fileStream.close();
 
 	fileStream.open(argv, std::ios::out | std::ios::binary);
@@ -209,33 +246,41 @@ void DeleteSomeWordFromFile(int* choice, const char* argv, std::fstream& fileStr
 	int count = 0;
 	for (size_t i = 0; i < *choice; i++)
 	{
-		if (text[i] == '\n')
+		if (fileText[i] == '\r')
+		{
+			count += 2;
+		}
+	}
+
+	for (size_t i = *choice; i < *choice + count; i++)
+	{
+		if (fileText[i] == '\r')
 		{
 			count += 2;
 		}
 	}
 	*choice += count;
 
-	if (text[*choice] == '\n')
+	if (fileText[*choice] == '\n')
 	{
-		(*choice)++;
+		*choice += 1;
 	}
-	else if (text[*choice] == '\r')
+	else if (fileText[*choice] == '\r')
 	{
 		*choice += 2;
 	}
-	fileStream.write(text, *choice - 1);  // "-1" to delete from the marked symbol
+	fileStream.write(fileText, *choice);
 
 	do
 	{
 		(*choice)++;
-		if (text[*choice] == ' ' || text[*choice] == '\n')
+		if (fileText[*choice] == ' ' || fileText[*choice] == '\n')
 		{
-			fileStream.write(text + *choice, fileSize - *choice);
+			fileStream.write(fileText + *choice, fileSize - *choice);
 			break;
 		}
-	} while (text[*choice] != '\0');
+	} while (fileText[*choice] != '\0');
 
-	std::cout << "Your file has been changed. I will close it.\n";
-	delete[] text;
+	std::cout << "Your file has been changed.\n";
+	delete[] fileText;
 }

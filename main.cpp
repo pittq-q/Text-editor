@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
 
 	system("cls");
 	char character;
-	std::cout << "Here is the file content:\n"
+	std::cout << "Hello!\nHere is the file content:\n"
 		<< "\n--------------------------\n";
 	while (fileStream.get(character))
 	{
@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
 		<< "2 - Start writing a text from the end;\n"
 		<< "3 - Start writing a text from specific point;\n"
 		<< "4 - Delete some character;\n"
-		<< "5 - Delete some word; (Does the same as option 4 for now)\n";
+		<< "5 - Delete some word.\n";
 	std::cin >> *choice;
 	std::cin.clear();
 	std::cin.ignore(LLONG_MAX, '\n');
